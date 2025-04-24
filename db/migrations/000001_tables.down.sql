@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS doctors;
+DROP TABLE IF EXISTS programs;
+DROP TABLE IF EXISTS clients;

@@ -1,0 +1,74 @@
+// This file contains the types and interfaces used in the application.
+// It acts as a contract between the different components of the application.
+// It defines the data structures and methods that are used to interact with the database.
+
+// structs define the data structures used in the application
+// interfaces define the methods in each service that are used to interact with the database
+package types
+
+type DoctorStore interface {
+	RegisterDoctors(doctor DoctorRegistration) error
+	LoginDoctor(email, password string) error
+}
+
+type DoctorRegistration struct {
+	FirstName   string `json:"firstname"`
+	LastName    string `json:"lastname"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phonenumber"`
+	Department  string `json:"department"`
+	Password    string `json:"password"`
+}
+
+type DocLogInRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+type ClientStore interface {
+	RegisterClients(client Client) error
+	EnrollClient(email string, programID string) error
+	SearchClient(phonenumber string) (ClientResponse, error)
+	GetAllClients() ([]Client, error)
+	UpdateClient(client Client) error
+	DeleteClient(phonenumber string) error
+}
+type Client struct {
+	ID               int     `json:"id"`
+	FirstName        string  `json:"firstname"`
+	LastName         string  `json:"lastname"`
+	PhoneNumber      string  `json:"phonenumber"`
+	Age              int     `json:"age"`
+	Height           float32 `json:"height"`
+	Weight           float32 `json:"weight"`
+	EmergencyContact string  `json:"emergency_contact"`
+	EmergencyNumber  string  `json:"emergency_number"`
+}
+
+type ClientResponse struct {
+	ID               int        `json:"id"`
+	FirstName        string     `json:"firstname"`
+	LastName         string     `json:"lastname"`
+	PhoneNumber      string     `json:"phonenumber"`
+	Height           float64    `json:"height"`
+	Weight           float64    `json:"weight"`
+	Age              int        `json:"age"`
+	EmergencyContact string     `json:"emergency_contact"`
+	EmergencyNumber  string     `json:"emergency_number"`
+	Programs         []Programs `json:"programs"`
+}
+
+type ProgramsStore interface {
+	RegisterPrograms(programs Programs) error
+	GetPrograms() ([]Programs, error)
+}
+
+type Programs struct {
+	Name     string `json:"name"`
+	Symptoms string `json:"symptoms"`
+	Severity int    `json:"severity"`
+}
+
+type ProgramEnrollment struct {
+	ProgramID int `json:"program_id"`
+	ClientID  int `json:"client_id"`
+}
