@@ -1,6 +1,7 @@
 package doctors
 
 import (
+	"cema_backend/auth"
 	"cema_backend/types"
 	"context"
 	"database/sql"
@@ -22,10 +23,18 @@ func NewStore(db *sql.DB) *Store {
 func (s *Store) RegisterDoctors(doctor types.DoctorRegistration) error {
 	// context is used to manage the lifetime of the request
 	ctx := context.Background()
-	query := `"INSERT INTO doctors (firstname, lastname, email, phonenumber, department, password) VALUES (?, ?, ?, ?, ?, ?)`
 
-	// Execute the query with the parameterized values
-	_, err := s.db.ExecContext(ctx, query, doctor.FirstName, doctor.LastName, doctor.Email, doctor.PhoneNumber, doctor.Department, doctor.Password)
+	// Hash the password
+	hashedPassword, err := auth.HashPassword(doctor.Password)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Update the query to use the hashed password
+	query := `INSERT INTO doctors (firstname, lastname, email, phonenumber, department, password) VALUES (?, ?, ?, ?, ?, ?)`
+
+	// Execute the query with the hashed password
+	_, err = s.db.ExecContext(ctx, query, doctor.FirstName, doctor.LastName, doctor.Email, doctor.PhoneNumber, doctor.Department, hashedPassword)
 	if err != nil {
 		return fmt.Errorf("failed to save doctor in DB %w", err)
 	}
@@ -37,24 +46,23 @@ func (s *Store) RegisterDoctors(doctor types.DoctorRegistration) error {
 func (s *Store) LoginDoctor(email, password string) error {
 	// context is used to manage the lifetime of the request
 	ctx := context.Background()
-	query := `SELECT email, firstname FROM doctors WHERE email = ? AND password = ?`
-	// Execute the query with the parameterized values
-	row := s.db.QueryRowContext(ctx, query, email, password)
-	var dbEmail, firstName string
-	// Scan the result into the variables
-	err := row.Scan(&dbEmail, &firstName)
+
+	// Retrieve the hashed password from the database
+	query := `SELECT password FROM doctors WHERE email = ?`
+	var storedHashedPassword string
+	err := s.db.QueryRowContext(ctx, query, email).Scan(&storedHashedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return fmt.Errorf("invalid email or password")
 		}
-		return fmt.Errorf("failed to query doctor %w", err)
+		return fmt.Errorf("failed to query doctor: %w", err)
 	}
-	if dbEmail != email {
+
+	// Verify the provided password against the stored hash
+	if !auth.CheckPasswordHash(password, storedHashedPassword) {
 		return fmt.Errorf("invalid email or password")
 	}
-	if firstName == "" {
-		return fmt.Errorf("invalid email or password")
-	}
-	// If successful, return nil otherwise return an error
+
+	// If successful, return nil
 	return nil
 }
