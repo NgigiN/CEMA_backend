@@ -18,6 +18,24 @@ type MockClientStore struct {
 	mock.Mock
 }
 
+// CreatePrescription implements types.ClientStore.
+func (m *MockClientStore) CreatePrescription(prescription types.Prescription) error {
+	args := m.Called(prescription)
+	return args.Error(0)
+}
+
+// GetPrescriptionsByClient implements types.ClientStore.
+func (m *MockClientStore) GetPrescriptionsByClient(clientID int) ([]types.Prescription, error) {
+	args := m.Called(clientID)
+	return args.Get(0).([]types.Prescription), args.Error(1)
+}
+
+// UpdatePrescription implements types.ClientStore.
+func (m *MockClientStore) UpdatePrescription(prescription types.Prescription) error {
+	args := m.Called(prescription)
+	return args.Error(0)
+}
+
 // DeleteClient implements types.ClientStore.
 func (m *MockClientStore) DeleteClient(phonenumber string) error {
 	args := m.Called(phonenumber)

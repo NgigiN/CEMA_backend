@@ -159,3 +159,49 @@ func (s *Store) DeleteClient(phonenumber string) error {
 	}
 	return nil
 }
+
+// CreatePrescription saves a new prescription in the database
+func (s *Store) CreatePrescription(prescription types.Prescription) error {
+	ctx := context.Background()
+	query := `INSERT INTO prescriptions (client_phone, doctor_id, medicines, date_issued) VALUES (?, ?, ?, ?)`
+	_, err := s.db.ExecContext(ctx, query, prescription.ClientPhone, prescription.DoctorID, prescription.Medicines, prescription.DateIssued)
+	if err != nil {
+		return fmt.Errorf("failed to save prescription in DB: %w", err)
+	}
+	return nil
+}
+
+// UpdatePrescription updates an existing prescription in the database
+func (s *Store) UpdatePrescription(prescription types.Prescription) error {
+	ctx := context.Background()
+	query := `UPDATE prescriptions SET medicines = ?, date_issued = ? WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, prescription.Medicines, prescription.DateIssued, prescription.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update prescription in DB: %w", err)
+	}
+	return nil
+}
+
+// GetPrescriptionsByClient retrieves all prescriptions for a specific client
+func (s *Store) GetPrescriptionsByClient(clientID int) ([]types.Prescription, error) {
+	ctx := context.Background()
+	query := `SELECT id, client_phone, doctor_id, medicines, date_issued FROM prescriptions WHERE client_phone = ?`
+	rows, err := s.db.QueryContext(ctx, query, clientID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve prescriptions: %w", err)
+	}
+	defer rows.Close()
+
+	var prescriptions []types.Prescription
+	for rows.Next() {
+		var prescription types.Prescription
+		if err := rows.Scan(&prescription.ID, &prescription.ClientPhone, &prescription.DoctorID, &prescription.Medicines, &prescription.DateIssued); err != nil {
+			return nil, err
+		}
+		prescriptions = append(prescriptions, prescription)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return prescriptions, nil
+}

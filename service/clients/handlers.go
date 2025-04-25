@@ -159,3 +159,37 @@ func (h *Handler) DeleteClient(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Client deleted successfully"})
 }
+
+// CreatePrescription handles the creation of a new prescription
+func (h *Handler) CreatePrescription(c *gin.Context) {
+	var request types.Prescription
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	err := h.store.CreatePrescription(request)
+	if err != nil {
+		logging.Error("Failed to create prescription: " + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating prescription"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Prescription created successfully"})
+}
+
+// UpdatePrescription handles the updating of an existing prescription
+func (h *Handler) UpdatePrescription(c *gin.Context) {
+	var request types.Prescription
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	err := h.store.UpdatePrescription(request)
+	if err != nil {
+		logging.Error("Failed to update prescription: " + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating prescription"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Prescription updated successfully"})
+}

@@ -31,6 +31,9 @@ type ClientStore interface {
 	GetAllClients() ([]Client, error)
 	UpdateClient(client Client) error
 	DeleteClient(phonenumber string) error
+	CreatePrescription(prescription Prescription) error
+	UpdatePrescription(prescription Prescription) error
+	GetPrescriptionsByClient(clientID int) ([]Prescription, error)
 }
 type Client struct {
 	ID               int     `json:"id"`
@@ -45,16 +48,17 @@ type Client struct {
 }
 
 type ClientResponse struct {
-	ID               int        `json:"id"`
-	FirstName        string     `json:"firstname"`
-	LastName         string     `json:"lastname"`
-	PhoneNumber      string     `json:"phonenumber"`
-	Height           float64    `json:"height"`
-	Weight           float64    `json:"weight"`
-	Age              int        `json:"age"`
-	EmergencyContact string     `json:"emergency_contact"`
-	EmergencyNumber  string     `json:"emergency_number"`
-	Programs         []Programs `json:"programs"`
+	ID               int            `json:"id"`
+	FirstName        string         `json:"firstname"`
+	LastName         string         `json:"lastname"`
+	PhoneNumber      string         `json:"phonenumber"`
+	Height           float64        `json:"height"`
+	Weight           float64        `json:"weight"`
+	Age              int            `json:"age"`
+	EmergencyContact string         `json:"emergency_contact"`
+	EmergencyNumber  string         `json:"emergency_number"`
+	Programs         []Programs     `json:"programs"`
+	Prescriptions    []Prescription `json:"prescriptions"`
 }
 
 type ProgramsStore interface {
@@ -70,4 +74,12 @@ type Programs struct {
 type ProgramEnrollment struct {
 	ProgramID int `json:"program_id"`
 	ClientID  int `json:"client_id"`
+}
+
+type Prescription struct {
+	ID         int      `json:"id"`
+	ClientPhone string `json:"client_phone"`
+	DoctorID   int      `json:"doctor_id"`
+	Medicines  []string `json:"medicines"`
+	DateIssued string   `json:"date_issued"`
 }
