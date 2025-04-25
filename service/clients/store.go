@@ -25,7 +25,7 @@ func (s *Store) RegisterClients(client types.Client) error {
 	// context is used to manage the lifetime of the request
 	ctx := context.Background()
 	// Insert queries are seperated to prevent SQL injection
-	query := `INSERT INTO clients (firstname, lastname, phonenumber, height, weight, age, emergencycontact, emergencynumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO clients (firstname, lastname, phonenumber, height, weight, age, emergency_contact, emergency_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 	// Execute the query with the parametized values
 	_, err := s.db.ExecContext(ctx, query, client.FirstName, client.LastName, client.PhoneNumber, client.Height, client.Weight, client.Age, client.EmergencyContact, client.EmergencyNumber)
@@ -36,13 +36,19 @@ func (s *Store) RegisterClients(client types.Client) error {
 }
 
 // EnrollClient enrolls a client in a program
-func (s *Store) EnrollClient(email string, programID string) error {
+func (s *Store) EnrollClient(phoneNumber string, programName string) error {
 	ctx := context.Background()
 
 	var clientID int
-	err := s.db.QueryRowContext(ctx, "SELECT id FROM clients WHERE email = ?", email).Scan(&clientID)
+	err := s.db.QueryRowContext(ctx, "SELECT id FROM clients WHERE phonenumber = ?", phoneNumber).Scan(&clientID)
 	if err != nil {
-		return fmt.Errorf("could not find client by email: %w", err)
+		return fmt.Errorf("could not find client by phone number: %w", err)
+	}
+
+	var programID int
+	err = s.db.QueryRowContext(ctx, "SELECT id FROM programs WHERE name = ?", programName).Scan(&programID)
+	if err != nil {
+		return fmt.Errorf("could not find program by name: %w", err)
 	}
 
 	query := `INSERT INTO enrollments (program_id, client_id) VALUES (?, ?)`
@@ -53,7 +59,7 @@ func (s *Store) EnrollClient(email string, programID string) error {
 	return nil
 }
 
-// SearchClient retrieves a client by their phone number(which in this case I assume is unique)
+// SearchClient retrieves a client by their phone number (which in this case I assume is unique)
 // and returns their details along with the programs they are enrolled in
 func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 	ctx := context.Background()
@@ -61,14 +67,16 @@ func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 	var client types.ClientResponse
 
 	// Get client data
-	clientQuery := `SELECT id, firstname, lastname, phonenumber, height, weight, age, emergencycontact, emergencynumber FROM clients WHERE phonenumber = ?`
+	clientQuery := `SELECT id, firstname, lastname, phonenumber, height, weight, age, emergency_contact, emergency_number FROM clients WHERE phonenumber = ?`
 	err := s.db.QueryRowContext(ctx, clientQuery, phonenumber).Scan(
 		&client.ID, &client.FirstName, &client.LastName,
 		&client.PhoneNumber, &client.Height, &client.Weight,
 		&client.Age, &client.EmergencyContact, &client.EmergencyNumber,
 	)
-	// if the client is not found, return an empty client
-	if err != nil {
+	// if the client is not found, return an error
+	if err == sql.ErrNoRows {
+		return client, fmt.Errorf("client does not exist")
+	} else if err != nil {
 		return client, fmt.Errorf("failed to retrieve client: %w", err)
 	}
 
@@ -101,7 +109,7 @@ func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 func (s *Store) GetAllClients() ([]types.Client, error) {
 	// context is used to manage the lifetime of the request
 	ctx := context.Background()
-	query := `SELECT id, firstname, lastname, phonenumber, height, weight, age, emergencycontact, emergencynumber FROM clients`
+	query := `SELECT id, firstname, lastname, phonenumber, height, weight, age, emergency_contact, emergency_number FROM clients`
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve clients: %w", err)
@@ -131,9 +139,9 @@ func (s *Store) GetAllClients() ([]types.Client, error) {
 func (s *Store) UpdateClient(client types.Client) error {
 	// context is used to manage the lifetime of the request
 	ctx := context.Background()
-	query := `UPDATE clients SET firstname = ?, lastname = ?, phonenumber = ?, height = ?, weight = ?, age = ?, emergencycontact = ?, emergencynumber = ? WHERE id = ?`
+	query := `UPDATE clients SET firstname = ?, lastname = ?, phonenumber = ?, height = ?, weight = ?, age = ?, emergency_contact = ?, emergency_number = ? WHERE id = ?`
 
-	_, err := s.db.ExecContext(ctx, query, client.FirstName, client.LastName, client.PhoneNumber, client.Height, client.Weight, client.Age, client.EmergencyContact, client.EmergencyNumber)
+	_, err := s.db.ExecContext(ctx, query, client.FirstName, client.LastName, client.PhoneNumber, client.Height, client.Weight, client.Age, client.EmergencyContact, client.EmergencyNumber, client.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update client %w", err)
 	}

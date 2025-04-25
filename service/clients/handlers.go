@@ -36,13 +36,16 @@ func (h *Handler) RegisterClients(c *gin.Context) {
 	}
 
 	// Check if the client already exists
-	// Assuming the phone number is unique for each client - bottlenecks at parents registering children
-	// and children registering parents - considering in rural areas they may not have Emails
-	existingClient, err := h.store.SearchClient(request.PhoneNumber)
-	if err == nil && existingClient.ID != 0 {
+	_, err := h.store.SearchClient(request.PhoneNumber)
+	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Client already exists"})
 		return
+	} else if err.Error() != "client does not exist" {
+		logging.Error("Error searching for client: " + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error searching for client"})
+		return
 	}
+
 	// Register the client
 	err = h.store.RegisterClients(types.Client{
 		FirstName:        request.FirstName,
@@ -66,17 +69,24 @@ func (h *Handler) RegisterClients(c *gin.Context) {
 // enrollClient handles the enrollment of a client in a program
 func (h *Handler) EnrollClient(c *gin.Context) {
 	var request struct {
-		Email     string `json:"email" binding:"required"`
-		ProgramID string `json:"programID" binding:"required"`
+		PhoneNumber string `json:"phoneNumber" binding:"required"`
+		ProgramName string `json:"programName" binding:"required"`
+	}
+
+	// Bind the request payload
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
 	}
 
 	// Validate the request
-	if request.Email == "" || request.ProgramID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email and ProgramID are required"})
+	if request.PhoneNumber == "" || request.ProgramName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "PhoneNumber and ProgramName are required"})
 		return
 	}
+
 	// Enroll the client
-	err := h.store.EnrollClient(request.Email, request.ProgramID)
+	err := h.store.EnrollClient(request.PhoneNumber, request.ProgramName)
 	if err != nil {
 		logging.Error("Failed to Enroll Client: " + err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error enrolling client"})
@@ -90,21 +100,24 @@ func (h *Handler) SearchClient(c *gin.Context) {
 	var request struct {
 		Phonenumber string `json:"phonenumber" binding:"required"`
 	}
+
+	// Bind the request payload
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
 	// Validate the request
 	if request.Phonenumber == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number is required"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
-		return
-	}
 	// Search for the client
 	client, err := h.store.SearchClient(request.Phonenumber)
 	if err != nil {
 		logging.Error("Failed to Search Client: " + err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error searching client"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Client not Found"})
 		return
 	}
 	c.JSON(http.StatusOK, client)
