@@ -8,5 +8,5 @@ import (
 // RegisterRoutes registers the routes for program-related operations.
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/register", h.RegisterPrograms)
-	router.GET("/get", h.GetPrograms)
+	router.GET("/all", h.GetPrograms)
 }
