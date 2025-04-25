@@ -1,9 +1,11 @@
 package doctors
 
 import (
+	"cema_backend/auth"
 	"cema_backend/logging"
 	"cema_backend/types"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,17 +58,30 @@ func (h *Handler) LoginDoctor(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-	// Validate the request
+
 	if request.Email == "" || request.Password == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
 		return
 	}
-	// Log in the doctor
+
 	err := h.store.LoginDoctor(request.Email, request.Password)
 	if err != nil {
 		logging.Error("Failed to Login Doctor: " + err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Doctor logged in successfully"})
+
+	// Generate JWT token
+	secret := []byte(os.Getenv("JWT_SECRET"))
+	token, err := auth.CreateJWT(secret, request.Email)
+	if err != nil {
+		logging.Error("Failed to create JWT token: " + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Doctor logged in successfully",
+		"token":   token,
+	})
 }
