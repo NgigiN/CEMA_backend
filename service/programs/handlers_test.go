@@ -43,7 +43,6 @@ func TestRegisterPrograms(t *testing.T) {
 	payload := types.Programs{
 		Name:     "Program A",
 		Symptoms: "Symptom A, Symptom B",
-		Severity: 1,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -68,8 +67,8 @@ func TestGetPrograms(t *testing.T) {
 
 	// Test case: Successful retrieval of programs
 	mockPrograms := []types.Programs{
-		{Name: "Program A", Symptoms: "Symptom A", Severity: 1},
-		{Name: "Program B", Symptoms: "Symptom B", Severity: 2},
+		{Name: "Program A", Symptoms: "Symptom A"},
+		{Name: "Program B", Symptoms: "Symptom B"},
 	}
 	mockStore.On("GetPrograms").Return(mockPrograms, nil)
 

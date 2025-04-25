@@ -27,7 +27,7 @@ func (h *Handler) RegisterPrograms(c *gin.Context) {
 	}
 
 	// Validate the request
-	if request.Name == "" || request.Symptoms == "" || request.Severity == 0 {
+	if request.Name == "" || request.Symptoms == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
 		return
 	}
@@ -35,7 +35,6 @@ func (h *Handler) RegisterPrograms(c *gin.Context) {
 	err := h.store.RegisterPrograms(types.Programs{
 		Name:     request.Name,
 		Symptoms: request.Symptoms,
-		Severity: request.Severity,
 	})
 	if err != nil {
 		logging.Error("Failed to Register Program: " + err.Error())

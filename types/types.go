@@ -65,7 +65,6 @@ type ProgramsStore interface {
 type Programs struct {
 	Name     string `json:"name"`
 	Symptoms string `json:"symptoms"`
-	Severity int    `json:"severity"`
 }
 
 type ProgramEnrollment struct {

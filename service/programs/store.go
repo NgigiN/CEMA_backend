@@ -19,8 +19,8 @@ func NewStore(db *sql.DB) *Store {
 // RegisterPrograms saves a new program's details in the database.
 // It takes a Programs struct as input and returns an error if the operation fails.
 func (s *Store) RegisterPrograms(programs types.Programs) error {
-	_, err := s.db.Exec("INSERT INTO programs (name, symptoms, severity) VALUES (?, ?, ?)",
-		programs.Name, programs.Symptoms, programs.Severity)
+	_, err := s.db.Exec("INSERT INTO programs (name, symptoms) VALUES (?, ?)",
+		programs.Name, programs.Symptoms)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (s *Store) RegisterPrograms(programs types.Programs) error {
 // GetPrograms retrieves all programs from the database.
 // It returns a slice of Programs structs and an error if the operation fails.
 func (s *Store) GetPrograms() ([]types.Programs, error) {
-	rows, err := s.db.Query("SELECT name, symptoms, severity FROM programs")
+	rows, err := s.db.Query("SELECT name, symptoms FROM programs")
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (s *Store) GetPrograms() ([]types.Programs, error) {
 	var programs []types.Programs
 	for rows.Next() {
 		var program types.Programs
-		if err := rows.Scan(&program.Name, &program.Symptoms, &program.Severity); err != nil {
+		if err := rows.Scan(&program.Name, &program.Symptoms); err != nil {
 			return nil, err
 		}
 		programs = append(programs, program)

@@ -96,7 +96,7 @@ func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 	// Scan the rows and loop through them appending them to the client's programs
 	for rows.Next() {
 		var program types.Programs
-		if err := rows.Scan(&program.Name, &program.Symptoms, &program.Severity); err != nil {
+		if err := rows.Scan(&program.Name, &program.Symptoms); err != nil {
 			return client, err
 		}
 		client.Programs = append(client.Programs, program)
