@@ -26,7 +26,7 @@ type DocLogInRequest struct {
 }
 type ClientStore interface {
 	RegisterClients(client Client) error
-	EnrollClient(email string, programID string) error
+	EnrollClient(phoneNumber string, programName string) error
 	SearchClient(phonenumber string) (ClientResponse, error)
 	GetAllClients() ([]Client, error)
 	UpdateClient(client Client) error

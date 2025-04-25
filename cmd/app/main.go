@@ -1,5 +1,3 @@
-// Entry point for the application
-// This file contains the main function that initializes and runs the API server.
 package app
 
 import (
