@@ -1,6 +1,6 @@
 # CEMA Backend
 
-A robust healthcare management system backend built with Go, providing APIs for managing doctors, patients, medical programs, and prescriptions.
+A  healthcare management system backend built with Go, providing APIs for managing doctors, patients, medical programs, and prescriptions.
 
 ## 🔧 Tech Stack
 
@@ -10,8 +10,6 @@ A robust healthcare management system backend built with Go, providing APIs for 
 - **Authentication:** JWT (JSON Web Tokens)
 - **Dependencies Management:** Go Modules
 - **Testing Framework:** Go Testing with Testify
-- **Documentation:** Postman Collection
-- **Environment Management:** godotenv
 
 ## 🌟 Features
 
