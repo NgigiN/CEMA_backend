@@ -6,6 +6,10 @@
 // interfaces define the methods in each service that are used to interact with the database
 package types
 
+import (
+	"time"
+)
+
 type DoctorStore interface {
 	RegisterDoctors(doctor DoctorRegistration) error
 	LoginDoctor(email, password string) error
@@ -33,7 +37,7 @@ type ClientStore interface {
 	DeleteClient(phonenumber string) error
 	CreatePrescription(prescription Prescription) error
 	UpdatePrescription(prescription Prescription) error
-	GetPrescriptionsByClient(clientID int) ([]Prescription, error)
+	GetPrescriptionsByClient(client_phone string) ([]Prescription, error)
 }
 type Client struct {
 	ID               int     `json:"id"`
@@ -77,9 +81,9 @@ type ProgramEnrollment struct {
 }
 
 type Prescription struct {
-	ID         int      `json:"id"`
-	ClientPhone string `json:"client_phone"`
-	DoctorID   int      `json:"doctor_id"`
-	Medicines  []string `json:"medicines"`
-	DateIssued string   `json:"date_issued"`
+	ID          int       `json:"id"`
+	ClientPhone string    `json:"client_phone"`
+	DoctorID    int       `json:"doctor_id"`
+	Medicines   string    `json:"medicines"`
+	DateIssued  time.Time `json:"date_issued"`
 }
