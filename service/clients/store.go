@@ -82,7 +82,7 @@ func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 
 	// Get program related to the client
 	programQuery := `
-		SELECT p.name, p.symptoms, p.severity
+		SELECT p.name, p.symptoms
 		FROM enrollments e
 		JOIN programs p ON e.program_id = p.id
 		WHERE e.client_id = ?
@@ -101,6 +101,12 @@ func (s *Store) SearchClient(phonenumber string) (types.ClientResponse, error) {
 		}
 		client.Programs = append(client.Programs, program)
 	}
+
+	client.Prescriptions, err = s.GetPrescriptionsByClient(phonenumber)
+	if err != nil {
+		return client, fmt.Errorf("failed to retrieve prescriptions: %w", err)
+	}
+
 	return client, nil
 }
 
@@ -183,10 +189,10 @@ func (s *Store) UpdatePrescription(prescription types.Prescription) error {
 }
 
 // GetPrescriptionsByClient retrieves all prescriptions for a specific client
-func (s *Store) GetPrescriptionsByClient(clientID int) ([]types.Prescription, error) {
+func (s *Store) GetPrescriptionsByClient(client_phone string) ([]types.Prescription, error) {
 	ctx := context.Background()
 	query := `SELECT id, client_phone, doctor_id, medicines, date_issued FROM prescriptions WHERE client_phone = ?`
-	rows, err := s.db.QueryContext(ctx, query, clientID)
+	rows, err := s.db.QueryContext(ctx, query, client_phone)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve prescriptions: %w", err)
 	}

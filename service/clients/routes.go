@@ -8,4 +8,7 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/program-enroll", h.EnrollClient)
 	router.POST("/search", h.SearchClient)
 	router.GET("/clients", h.GetAllClients)
+	router.POST("/prescription", h.CreatePrescription)
+	router.PUT("/prescription", h.UpdatePrescription)
+	router.DELETE("/delete", h.DeleteClient)
 }

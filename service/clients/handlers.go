@@ -4,6 +4,7 @@ import (
 	"cema_backend/logging"
 	"cema_backend/types"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -167,6 +168,9 @@ func (h *Handler) CreatePrescription(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+
+	t := time.Now().UTC()
+	request.DateIssued = t
 
 	err := h.store.CreatePrescription(request)
 	if err != nil {

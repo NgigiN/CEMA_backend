@@ -25,8 +25,8 @@ func (m *MockClientStore) CreatePrescription(prescription types.Prescription) er
 }
 
 // GetPrescriptionsByClient implements types.ClientStore.
-func (m *MockClientStore) GetPrescriptionsByClient(clientID int) ([]types.Prescription, error) {
-	args := m.Called(clientID)
+func (m *MockClientStore) GetPrescriptionsByClient(client_phone string) ([]types.Prescription, error) {
+	args := m.Called(client_phone)
 	return args.Get(0).([]types.Prescription), args.Error(1)
 }
 
