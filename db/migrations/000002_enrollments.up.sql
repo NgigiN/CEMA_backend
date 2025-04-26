@@ -1,4 +1,4 @@
-CREATE TABLE enrollments (
+CREATE TABLE IF NOT EXISTS enrollments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   client_id INT NOT NULL,
   program_id INT NOT NULL,
