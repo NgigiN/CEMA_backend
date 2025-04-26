@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "6b13f3a4-9a34-425c-8561-c3efe917807e",
+		"name": "CEMA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "35315949"
+	},
+	"item": [
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstname\": \"Stanley\",\n    \"lastname\": \"Mbugua\",\n    \"email\": \"stan@rfh.com\",\n    \"phonenumber\": \"1234567890\",\n    \"department\": \"Neuroscience\",\n    \"password\": \"cat1234\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/doctors/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Doctor Log in",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"email\": \"stan@rfh.com\",\n    \"password\": \"cat1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/doctors/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"phonenumber\": \"0115491173\",\n  \"age\": 10,\n  \"height\": 180,\n  \"weight\": 80,\n  \"emergency_contact\": \"father\",\n  \"emergency_number\": \"0987654321\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/clients/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Search",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phonenumber\": \"0115491173\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/clients/search"
+					},
+					"response": []
+				},
+				{
+					"name": "Client Program Enrollment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"0115491173\",\n    \"programName\": \"Tuberculosis\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/clients/program-enroll"
+					},
+					"response": []
+				},
+				{
+					"name": "All Clients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/clients/clients"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Prescriptions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_phone\": \"0115491173\",\n    \"doctor_id\": 1,\n    \"medicines\": [\"piriton\"],\n    \"date_issued\": \"24/04/2025\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/clients/prescription"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Programs",
+			"item": [
+				{
+					"name": "Program Creation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Tuberculosis\",\n    \"symptoms\": \"Blue nose\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/programs/register"
+					},
+					"response": []
+				},
+				{
+					"name": "All Programs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/programs/all"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "time",
+			"value": "\"24/04/2025\""
+		}
+	]
+}
