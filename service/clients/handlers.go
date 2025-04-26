@@ -4,6 +4,8 @@ import (
 	"cema_backend/logging"
 	"cema_backend/types"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +21,13 @@ func NewHandler(store types.ClientStore) *Handler {
 	return &Handler{store: store}
 }
 
+func validatePhoneNumber(phone string) bool {
+	// Basic phone number validation for Kenyan numbers
+	// Accepts formats: +254XXXXXXXXX, 254XXXXXXXXX, 0XXXXXXXXX
+	matched, _ := regexp.MatchString(`^(?:\+254|254|0)\d{9}$`, phone)
+	return matched
+}
+
 // RegisterClients handles the registration of a new client
 func (h *Handler) RegisterClients(c *gin.Context) {
 	var request types.Client
@@ -26,6 +35,7 @@ func (h *Handler) RegisterClients(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+
 	// Validate the request
 	if request.FirstName == "" || request.LastName == "" || request.PhoneNumber == "" || request.Height == 0 || request.Weight == 0 || request.Age == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
@@ -33,6 +43,16 @@ func (h *Handler) RegisterClients(c *gin.Context) {
 	}
 	if request.EmergencyContact == "" || request.EmergencyNumber == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Emergency contact and number are required"})
+		return
+	}
+
+	// Validate phone numbers
+	if !validatePhoneNumber(request.PhoneNumber) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number format"})
+		return
+	}
+	if !validatePhoneNumber(request.EmergencyNumber) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid emergency contact number format"})
 		return
 	}
 
@@ -163,16 +183,35 @@ func (h *Handler) DeleteClient(c *gin.Context) {
 
 // CreatePrescription handles the creation of a new prescription
 func (h *Handler) CreatePrescription(c *gin.Context) {
-	var request types.Prescription
+	var request struct {
+		ClientPhone string   `json:"client_phone"`
+		DoctorID    int      `json:"doctor_id"`
+		Medicines   []string `json:"medicines"`
+		DateIssued  string   `json:"date_issued"`
+	}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	t := time.Now().UTC()
-	request.DateIssued = t
+	// Convert medicines array to comma-separated string
+	medicinesStr := strings.Join(request.Medicines, ",")
 
-	err := h.store.CreatePrescription(request)
+	// Parse date
+	parsedDate, err := time.Parse("02/01/2006", request.DateIssued)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use DD/MM/YYYY"})
+		return
+	}
+
+	prescription := types.Prescription{
+		ClientPhone: request.ClientPhone,
+		DoctorID:    request.DoctorID,
+		Medicines:   medicinesStr,
+		DateIssued:  parsedDate,
+	}
+
+	err = h.store.CreatePrescription(prescription)
 	if err != nil {
 		logging.Error("Failed to create prescription: " + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating prescription"})

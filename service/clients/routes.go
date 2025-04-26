@@ -1,14 +1,25 @@
 // This file contains the endpoints for the clients service.
 package clients
 
-import "github.com/gin-gonic/gin"
+import (
+	"cema_backend/auth"
+
+	"github.com/gin-gonic/gin"
+)
 
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
+	// Public routes
 	router.POST("/register", h.RegisterClients)
-	router.POST("/program-enroll", h.EnrollClient)
 	router.POST("/search", h.SearchClient)
-	router.GET("/clients", h.GetAllClients)
-	router.POST("/prescription", h.CreatePrescription)
-	router.PUT("/prescription", h.UpdatePrescription)
-	router.DELETE("/delete", h.DeleteClient)
+
+	// Protected routes
+	protected := router.Group("/")
+	protected.Use(auth.AuthMiddleware())
+	{
+		protected.POST("/program-enroll", h.EnrollClient)
+		protected.GET("/clients", h.GetAllClients)
+		protected.POST("/prescription", h.CreatePrescription)
+		protected.PUT("/prescription", h.UpdatePrescription)
+		protected.DELETE("/delete", h.DeleteClient)
+	}
 }
